@@ -1,9 +1,8 @@
-// lib/core/utils/constants.dart
 import 'package:flutter/material.dart';
 
 class AppConstants {
-  // Ganti URL ini dengan URL backend Express/Spring Boot milikmu nanti
-  static const String baseUrl = 'https://api-pustakasiswa.com/api'; 
+  // Gunakan IP Ajaib Emulator agar langsung tembus ke Node.js di laptop
+  static const String baseUrl = 'http://10.0.2.2:3000'; 
   
   // Google Books API (Free)
   static const String googleBooksApiUrl = 'https://www.googleapis.com/books/v1/volumes';

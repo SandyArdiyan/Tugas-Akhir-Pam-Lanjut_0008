@@ -17,12 +17,24 @@ class BookModel {
     final volumeInfo = json['volumeInfo'] ?? {};
     final imageLinks = volumeInfo['imageLinks'] ?? {};
     
+    // 1. Parsing List Authors yang jauh lebih aman dari error type-casting
+    List<String> parsedAuthors = ['Penulis Tidak Diketahui'];
+    if (volumeInfo['authors'] != null) {
+      parsedAuthors = (volumeInfo['authors'] as List).map((e) => e.toString()).toList();
+    }
+
+    // 2. Cegah error HTTP Cleartext untuk load gambar cover buku
+    String thumb = imageLinks['thumbnail'] ?? '';
+    if (thumb.startsWith('http://')) {
+      thumb = thumb.replaceFirst('http://', 'https://');
+    }
+    
     return BookModel(
-      id: json['id'] ?? '',
-      title: volumeInfo['title'] ?? 'Judul Tidak Diketahui',
-      authors: List<String>.from(volumeInfo['authors'] ?? []),
-      description: volumeInfo['description'] ?? 'Tidak ada deskripsi.',
-      thumbnailUrl: imageLinks['thumbnail'] ?? '', // URL cover buku
+      id: json['id']?.toString() ?? '',
+      title: volumeInfo['title']?.toString() ?? 'Judul Tidak Diketahui',
+      authors: parsedAuthors,
+      description: volumeInfo['description']?.toString() ?? 'Tidak ada deskripsi.',
+      thumbnailUrl: thumb,
     );
   }
 }

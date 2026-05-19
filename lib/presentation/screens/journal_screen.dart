@@ -17,7 +17,6 @@ class _JournalScreenState extends State<JournalScreen> {
   @override
   void initState() {
     super.initState();
-    // READ: Load data jurnal saat halaman dibuka
     context.read<JournalBloc>().add(JournalLoadRequested());
   }
 
@@ -27,7 +26,7 @@ class _JournalScreenState extends State<JournalScreen> {
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: Text(existingJournal == null ? 'Buat Jurnal Baru' : 'Edit Jurnal'),
           content: Column(
@@ -39,25 +38,35 @@ class _JournalScreenState extends State<JournalScreen> {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext), 
+              child: const Text('Batal', style: TextStyle(color: Colors.grey))
+            ),
             ElevatedButton(
               onPressed: () {
+                if (titleController.text.trim().isEmpty || reviewController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Isi semua kolom!'), backgroundColor: Colors.red)
+                  );
+                  return;
+                }
+
                 final newJournal = JournalModel(
-                  id: existingJournal?.id ?? '', // ID kosong jika baru
-                  bookId: 'custom', 
-                  bookTitle: titleController.text,
-                  review: reviewController.text,
+                  id: existingJournal?.id ?? '', 
+                  bookId: existingJournal?.bookId ?? 'custom_${DateTime.now().millisecondsSinceEpoch}', 
+                  bookTitle: titleController.text.trim(),
+                  review: reviewController.text.trim(),
                   rating: 5,
                 );
 
                 if (existingJournal == null) {
-                  // CREATE
+                  // Memicu event Add Jurnal
                   context.read<JournalBloc>().add(JournalAddRequested(newJournal));
                 } else {
-                  // UPDATE
+                  // Memicu event Update Jurnal
                   context.read<JournalBloc>().add(JournalUpdateRequested(existingJournal.id, newJournal));
                 }
-                Navigator.pop(context);
+                Navigator.pop(dialogContext); // Tutup dialog setelah tekan simpan
               },
               child: const Text('Simpan'),
             ),
@@ -74,13 +83,13 @@ class _JournalScreenState extends State<JournalScreen> {
       body: BlocConsumer<JournalBloc, JournalState>(
         listener: (context, state) {
           if (state is JournalActionSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: Colors.green));
           } else if (state is JournalError) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: Colors.red));
           }
         },
         builder: (context, state) {
-          if (state is JournalLoading) {
+          if (state is JournalLoading || state is JournalInitial) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is JournalLoaded) {
             if (state.journals.isEmpty) {
@@ -91,19 +100,17 @@ class _JournalScreenState extends State<JournalScreen> {
               itemBuilder: (context, index) {
                 final journal = state.journals[index];
                 return Card(
-                  margin: const EdgeInsets.all(10),
+                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   child: ListTile(
                     title: Text(journal.bookTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text(journal.review, maxLines: 2, overflow: TextOverflow.ellipsis),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // UPDATE Icon
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.orange),
                           onPressed: () => _showFormDialog(context, existingJournal: journal),
                         ),
-                        // DELETE Icon
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () => context.read<JournalBloc>().add(JournalDeleteRequested(journal.id)),
@@ -114,12 +121,16 @@ class _JournalScreenState extends State<JournalScreen> {
                 );
               },
             );
+          } else if (state is JournalError) {
+            return Center(
+              child: Text('Terjadi Kesalahan:\n${state.message}', textAlign: TextAlign.center, style: const TextStyle(color: Colors.red)),
+            );
           }
-          return const Center(child: Text('Gagal memuat jurnal.'));
+          return const Center(child: CircularProgressIndicator());
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showFormDialog(context), // Tombol untuk CREATE
+        onPressed: () => _showFormDialog(context),
         child: const Icon(Icons.add),
       ),
     );

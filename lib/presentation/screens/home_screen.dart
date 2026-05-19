@@ -32,6 +32,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -61,13 +68,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: CustomTextField(
                     controller: _searchController,
                     label: 'Cari judul buku di Google Books...',
+                    // TAMBAHAN: Mengubah keyboard menjadi mode "Search"
+                    textInputAction: TextInputAction.search, 
+                    onSubmitted: (value) {
+                      // API hanya dipanggil kalau teks tidak kosong dan tombol enter HP ditekan
+                      if (value.trim().isNotEmpty) {
+                        context.read<BookBloc>().add(BookSearchRequested(value.trim()));
+                      }
+                    },
                   ),
                 ),
                 const SizedBox(width: 10),
                 IconButton(
                   icon: const Icon(Icons.search, size: 30, color: Colors.blue),
                   onPressed: () {
-                    context.read<BookBloc>().add(BookSearchRequested(_searchController.text));
+                    // API juga bisa dipanggil lewat ikon kaca pembesar
+                    if (_searchController.text.trim().isNotEmpty) {
+                      context.read<BookBloc>().add(BookSearchRequested(_searchController.text.trim()));
+                    }
                   },
                 )
               ],
@@ -90,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       return BookCard(
                         book: book,
                         onTap: () {
-                          // Aksi jika buku di klik (misal mau langsung buat jurnal)
+                          // Aksi jika buku di klik
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Pilih ${book.title} untuk ditambahkan ke jurnal? Buka menu Jurnal Saya!')),
                           );
@@ -101,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 } else if (state is BookError) {
                   return Center(child: Text(state.message));
                 }
-                return const Center(child: Text('Ketikkan judul buku untuk memulai pencarian.'));
+                return const Center(child: Text('Ketikkan judul buku, lalu tekan tombol Cari.'));
               },
             ),
           ),

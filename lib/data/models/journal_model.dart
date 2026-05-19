@@ -3,34 +3,36 @@ class JournalModel {
   final String bookId;
   final String bookTitle;
   final String review;
-  final int rating; // Misal 1 sampai 5
+  final int rating;
 
   JournalModel({
-    required this.id,
+    this.id = '',
     required this.bookId,
     required this.bookTitle,
     required this.review,
-    required this.rating,
+    this.rating = 5,
   });
 
-  // Dari JSON API ke Object Dart (Read)
   factory JournalModel.fromJson(Map<String, dynamic> json) {
     return JournalModel(
-      id: json['id'].toString(),
-      bookId: json['bookId'] ?? '',
-      bookTitle: json['bookTitle'] ?? '',
-      review: json['review'] ?? '',
-      rating: json['rating'] ?? 0,
+      id: (json['_id'] ?? json['id'] ?? '').toString(),
+      bookId: (json['bookId'] ?? '').toString(),
+      bookTitle: (json['bookTitle'] ?? 'Tanpa Judul').toString(),
+      review: (json['review'] ?? '').toString(),
+      rating: (json['rating'] != null) ? int.tryParse(json['rating'].toString()) ?? 5 : 5,
     );
   }
 
-  // Dari Object Dart ke JSON API (Create/Update)
   Map<String, dynamic> toJson() {
-    return {
+    final data = <String, dynamic>{
       'bookId': bookId,
       'bookTitle': bookTitle,
       'review': review,
       'rating': rating,
     };
+    if (id.trim().isNotEmpty) {
+      data['id'] = id;
+    }
+    return data;
   }
 }

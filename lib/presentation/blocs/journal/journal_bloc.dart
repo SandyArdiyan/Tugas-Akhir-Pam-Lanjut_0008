@@ -7,11 +7,10 @@ class JournalBloc extends Bloc<JournalEvent, JournalState> {
   final JournalRepository journalRepository;
 
   JournalBloc({required this.journalRepository}) : super(JournalInitial()) {
-    
     on<JournalLoadRequested>((event, emit) async {
       emit(JournalLoading());
       try {
-        final journals = await journalRepository.getJournals(searchQuery: event.searchQuery);
+        final journals = await journalRepository.getJournals();
         emit(JournalLoaded(journals));
       } catch (e) {
         emit(JournalError(e.toString()));
@@ -19,35 +18,22 @@ class JournalBloc extends Bloc<JournalEvent, JournalState> {
     });
 
     on<JournalAddRequested>((event, emit) async {
-      emit(JournalLoading());
       try {
         await journalRepository.createJournal(event.journal);
-        emit(JournalActionSuccess("Jurnal berhasil ditambahkan!"));
-        add(JournalLoadRequested()); 
+        final journals = await journalRepository.getJournals();
+        emit(JournalLoaded(journals));
       } catch (e) {
-        emit(JournalError(e.toString()));
-      }
-    });
-
-    on<JournalUpdateRequested>((event, emit) async {
-      emit(JournalLoading());
-      try {
-        await journalRepository.updateJournal(event.id, event.journal);
-        emit(JournalActionSuccess("Jurnal berhasil diperbarui!"));
-        add(JournalLoadRequested()); 
-      } catch (e) {
-        emit(JournalError(e.toString()));
+        emit(JournalError("Gagal menyimpan jurnal"));
       }
     });
 
     on<JournalDeleteRequested>((event, emit) async {
-      emit(JournalLoading());
       try {
         await journalRepository.deleteJournal(event.id);
-        emit(JournalActionSuccess("Jurnal berhasil dihapus!"));
-        add(JournalLoadRequested()); 
+        final journals = await journalRepository.getJournals();
+        emit(JournalLoaded(journals));
       } catch (e) {
-        emit(JournalError(e.toString()));
+        emit(JournalError("Gagal menghapus jurnal"));
       }
     });
   }
