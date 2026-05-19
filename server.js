@@ -22,6 +22,9 @@ app.get('/', (req, res) => {
 // --- RUTE API ---
 const authRoutes = require('./routes/auth');
 app.use('/auth', authRoutes); 
+
+const journalRoutes = require('./routes/journal'); // Pastikan file ./routes/journal.js sudah ada
+app.use('/journals', journalRoutes);
 // ----------------
 
 // Bikin variabel PORT dulu, baru jalankan app.listen
