@@ -25,6 +25,10 @@ app.use('/auth', authRoutes);
 
 const journalRoutes = require('./routes/journal'); // Pastikan file ./routes/journal.js sudah ada
 app.use('/journals', journalRoutes);
+
+// TAMBAHAN RUTE RAK BUKU (SHELF) DI SINI
+const shelfRoutes = require('./routes/shelf'); // Pastikan file ./routes/shelf.js sudah ada di foldermu
+app.use('/api/shelf', shelfRoutes);
 // ----------------
 
 // Bikin variabel PORT dulu, baru jalankan app.listen

@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 const journalSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Relasi ke model User
-    required: true
+    ref: 'User',
+    required: false // Agar tidak error saat simpan tanpa ID user
   },
   bookId: {
     type: String,
-    required: true, // ID buku dari Google Books API
+    required: false, // Agar tidak error saat simpan tanpa ID buku
   },
   bookTitle: {
     type: String,
