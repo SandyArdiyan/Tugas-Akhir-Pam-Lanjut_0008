@@ -1,21 +1,24 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart'; 
-import '../../core/utils/constants.dart';
 import '../models/book_model.dart';
 
 class BookRepository {
   final Dio _dio = Dio();
+  
+  // API Key resmi milikmu
+  final String apiKey = "AIzaSyD4GGjsMtSOkehkXMDbgbGMReFTu9xB5ZQ"; 
 
   Future<List<BookModel>> searchBooks(String query, {int startIndex = 0}) async {
     try {
       if (query.trim().isEmpty) return [];
 
       final response = await _dio.get(
-        AppConstants.googleBooksApiUrl,
+        'https://www.googleapis.com/books/v1/volumes', 
         queryParameters: {
           'q': query,
           'startIndex': startIndex,
-          'maxResults': 10, 
+          'maxResults': 10,
+          'key': apiKey, // API Key disisipkan di sini agar Google tidak memblokir
         },
       );
 
@@ -32,7 +35,7 @@ class BookRepository {
     } catch (e) {
       debugPrint('=== ERROR SEARCH BOOKS ===');
       debugPrint(e.toString());
-      throw Exception('Gagal memuat buku: Periksa koneksi internet atau query pencarian.');
+      throw Exception('Gagal memuat buku. Pastikan internet stabil dan API key valid.');
     }
   }
 }

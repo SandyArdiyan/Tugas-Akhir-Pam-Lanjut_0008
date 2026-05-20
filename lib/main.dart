@@ -11,12 +11,14 @@ import 'data/storage/secure_storage_helper.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/book_repository.dart';
 import 'data/repositories/journal_repository.dart';
+import 'data/repositories/shelf_repository.dart'; // <-- TAMBAHAN: Repository Rak
 
 // Import Blocs & Events
 import 'presentation/blocs/auth/auth_bloc.dart';
-import 'presentation/blocs/auth/auth_event.dart'; // Wajib di-import untuk AuthCheckRequested
+import 'presentation/blocs/auth/auth_event.dart';
 import 'presentation/blocs/book/book_bloc.dart';
 import 'presentation/blocs/journal/journal_bloc.dart';
+import 'presentation/blocs/shelf_bloc.dart'; // <-- TAMBAHAN: BLoC Rak (Sesuaikan foldernya jika kamu menaruhnya di dalam folder 'shelf/')
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +40,7 @@ class MyApp extends StatelessWidget {
         RepositoryProvider(create: (_) => AuthRepository(dioClient, secureStorage)),
         RepositoryProvider(create: (_) => BookRepository()),
         RepositoryProvider(create: (_) => JournalRepository(dioClient)),
+        RepositoryProvider(create: (_) => ShelfRepository()), // <-- TAMBAHAN RAK
       ],
       // 3. Daftarkan Semua BLoC untuk Mengatur Logika Bisnis Aplikasi
       child: MultiBlocProvider(
@@ -56,6 +59,12 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) => JournalBloc(
               journalRepository: context.read<JournalRepository>(),
+            ),
+          ),
+          // <-- TAMBAHAN BLOC RAK
+          BlocProvider(
+            create: (context) => ShelfBloc(
+              shelfRepository: context.read<ShelfRepository>(),
             ),
           ),
         ],

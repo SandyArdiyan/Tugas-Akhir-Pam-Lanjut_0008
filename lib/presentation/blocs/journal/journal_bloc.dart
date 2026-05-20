@@ -7,11 +7,12 @@ class JournalBloc extends Bloc<JournalEvent, JournalState> {
   final JournalRepository journalRepository;
 
   JournalBloc({required this.journalRepository}) : super(JournalInitial()) {
+    
     on<JournalLoadRequested>((event, emit) async {
       emit(JournalLoading());
       try {
         final journals = await journalRepository.getJournals();
-        emit(JournalLoaded(journals));
+        emit(JournalLoaded(List.from(journals))); // Gunakan List.from agar object baru
       } catch (e) {
         emit(JournalError(e.toString()));
       }
@@ -21,7 +22,9 @@ class JournalBloc extends Bloc<JournalEvent, JournalState> {
       try {
         await journalRepository.createJournal(event.journal);
         final journals = await journalRepository.getJournals();
-        emit(JournalLoaded(journals));
+        // Emit State Loading sebentar agar UI memaksa rebuild, baru masukkan data
+        emit(JournalLoading()); 
+        emit(JournalLoaded(List.from(journals)));
       } catch (e) {
         emit(JournalError("Gagal menyimpan jurnal"));
       }
@@ -31,7 +34,8 @@ class JournalBloc extends Bloc<JournalEvent, JournalState> {
       try {
         await journalRepository.deleteJournal(event.id);
         final journals = await journalRepository.getJournals();
-        emit(JournalLoaded(journals));
+        emit(JournalLoading()); 
+        emit(JournalLoaded(List.from(journals)));
       } catch (e) {
         emit(JournalError("Gagal menghapus jurnal"));
       }

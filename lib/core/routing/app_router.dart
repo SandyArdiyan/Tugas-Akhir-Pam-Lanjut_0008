@@ -1,38 +1,35 @@
-// lib/core/routing/app_router.dart
 import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
-import '../../data/storage/secure_storage_helper.dart';
 
-// (Terkadang ada error merah di sini karena file screen belum dibuat, abaikan dulu)
-import '../../presentation/screens/splash_screen.dart';
-import '../../presentation/screens/login_screen.dart';
+// Import semua halaman (screens) yang ada di aplikasimu
 import '../../presentation/screens/home_screen.dart';
-import '../../presentation/screens/journal_screen.dart';
+import '../../presentation/screens/shelf_screen.dart'; // <-- INI YANG TADI HILANG
+
+// Jika ada garis merah di dua baris bawah ini, 
+// sesuaikan nama file-nya dengan yang ada di laptopmu ya!
+import '../../presentation/screens/journal_screen.dart'; 
+import '../../presentation/screens/login_screen.dart';
 
 class AppRouter {
-  final SecureStorageHelper _storageHelper = SecureStorageHelper();
-
-  late final GoRouter router = GoRouter(
-    initialLocation: '/', // Mulai dari Splash Screen
+  final GoRouter router = GoRouter(
+    initialLocation: '/home', // Ubah ke '/login' jika aplikasi harus mulai dari login
     routes: [
-      GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
-      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-      GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
-      GoRoute(path: '/journal', builder: (context, state) => const JournalScreen()),
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/home',
+        builder: (context, state) => const HomeScreen(),
+      ),
+      // --- INI ADALAH JALUR MENUJU RAK VIRTUAL YANG BARU ---
+      GoRoute(
+        path: '/shelf',
+        builder: (context, state) => const ShelfScreen(),
+      ),
+      GoRoute(
+        path: '/journal',
+        builder: (context, state) => const JournalScreen(),
+      ),
     ],
-    // ROUTE GUARD (Middleware Navigasi)
-    redirect: (BuildContext context, GoRouterState state) async {
-      final bool loggedIn = await _storageHelper.hasToken();
-      final bool isLoggingIn = state.matchedLocation == '/login';
-      final bool isSplash = state.matchedLocation == '/';
-
-      // Jika belum login, dan tidak sedang di halaman login/splash -> tendang ke login
-      if (!loggedIn && !isLoggingIn && !isSplash) return '/login';
-      
-      // Jika sudah login, tapi mencoba buka halaman login -> tendang ke home
-      if (loggedIn && isLoggingIn) return '/home';
-      
-      return null; // Bebas akses
-    },
   );
 }

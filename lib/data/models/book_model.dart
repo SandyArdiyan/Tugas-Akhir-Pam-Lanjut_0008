@@ -4,6 +4,7 @@ class BookModel {
   final List<String> authors;
   final String description;
   final String thumbnailUrl;
+  final String previewLink; // <-- TAMBAHAN
 
   BookModel({
     required this.id,
@@ -11,19 +12,18 @@ class BookModel {
     required this.authors,
     required this.description,
     required this.thumbnailUrl,
+    required this.previewLink, // <-- TAMBAHAN
   });
 
   factory BookModel.fromJson(Map<String, dynamic> json) {
     final volumeInfo = json['volumeInfo'] ?? {};
     final imageLinks = volumeInfo['imageLinks'] ?? {};
     
-    // 1. Parsing List Authors yang jauh lebih aman dari error type-casting
     List<String> parsedAuthors = ['Penulis Tidak Diketahui'];
     if (volumeInfo['authors'] != null) {
       parsedAuthors = (volumeInfo['authors'] as List).map((e) => e.toString()).toList();
     }
 
-    // 2. Cegah error HTTP Cleartext untuk load gambar cover buku
     String thumb = imageLinks['thumbnail'] ?? '';
     if (thumb.startsWith('http://')) {
       thumb = thumb.replaceFirst('http://', 'https://');
@@ -35,6 +35,8 @@ class BookModel {
       authors: parsedAuthors,
       description: volumeInfo['description']?.toString() ?? 'Tidak ada deskripsi.',
       thumbnailUrl: thumb,
+      // Mengambil link baca dari API Google
+      previewLink: volumeInfo['previewLink']?.toString() ?? '', 
     );
   }
 }

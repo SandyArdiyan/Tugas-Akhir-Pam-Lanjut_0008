@@ -7,7 +7,11 @@ import '../blocs/book/book_bloc.dart';
 import '../blocs/book/book_event.dart';
 import '../blocs/book/book_state.dart';
 import '../widgets/book_card.dart';
-import '../widgets/custom_textfield.dart';
+
+// JALUR IMPORT YANG SUDAH DIPERBAIKI SESUAI FOLDERMU:
+import '../blocs/shelf_bloc.dart';
+import '../blocs/shelf_event.dart';
+import '../../data/models/shelf_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,10 +27,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Deteksi scroll ke bawah untuk Pagination
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-        context.read<BookBloc>().add(BookLoadMoreRequested());
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent &&
+          _scrollController.position.pixels > 0) {
+        
+        final currentState = context.read<BookBloc>().state;
+        if (currentState is! BookLoading) {
+          context.read<BookBloc>().add(BookLoadMoreRequested());
+        }
       }
     });
   }
@@ -38,6 +46,13 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  void _executeSearch(String query) {
+    if (query.trim().isNotEmpty) {
+      FocusManager.instance.primaryFocus?.unfocus(); 
+      context.read<BookBloc>().add(BookSearchRequested(query.trim()));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,9 +60,14 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Eksplorasi Buku'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.collections_bookmark),
+            tooltip: 'Rak Virtual Saya',
+            onPressed: () => context.push('/shelf'), 
+          ),
+          IconButton(
             icon: const Icon(Icons.library_books),
             tooltip: 'Jurnal Saya',
-            onPressed: () => context.push('/journal'), // Ke halaman CRUDS
+            onPressed: () => context.push('/journal'), 
           ),
           IconButton(
             icon: const Icon(Icons.logout),
@@ -65,28 +85,29 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: CustomTextField(
+                  child: TextField(
                     controller: _searchController,
-                    label: 'Cari judul buku di Google Books...',
-                    // TAMBAHAN: Mengubah keyboard menjadi mode "Search"
-                    textInputAction: TextInputAction.search, 
-                    onSubmitted: (value) {
-                      // API hanya dipanggil kalau teks tidak kosong dan tombol enter HP ditekan
-                      if (value.trim().isNotEmpty) {
-                        context.read<BookBloc>().add(BookSearchRequested(value.trim()));
-                      }
-                    },
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      labelText: 'Cari judul buku di Google Books...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                    ),
+                    onSubmitted: (value) => _executeSearch(value),
                   ),
                 ),
                 const SizedBox(width: 10),
-                IconButton(
-                  icon: const Icon(Icons.search, size: 30, color: Colors.blue),
-                  onPressed: () {
-                    // API juga bisa dipanggil lewat ikon kaca pembesar
-                    if (_searchController.text.trim().isNotEmpty) {
-                      context.read<BookBloc>().add(BookSearchRequested(_searchController.text.trim()));
-                    }
-                  },
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.search, size: 28, color: Colors.white),
+                    onPressed: () => _executeSearch(_searchController.text),
+                  ),
                 )
               ],
             ),
@@ -102,22 +123,50 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemCount: state.hasReachedMax ? state.books.length : state.books.length + 1,
                     itemBuilder: (context, index) {
                       if (index >= state.books.length) {
-                        return const Center(child: Padding(padding: EdgeInsets.all(15.0), child: CircularProgressIndicator()));
+                        return const Center(
+                            child: Padding(
+                                padding: EdgeInsets.all(15.0),
+                                child: CircularProgressIndicator()));
                       }
                       final book = state.books[index];
                       return BookCard(
                         book: book,
                         onTap: () {
-                          // Aksi jika buku di klik
+                          // KODE YANG SUDAH BERSIH DARI ERROR TYPE CHECK
+                          final shelfBook = ShelfModel(
+                            id: '', 
+                            bookId: book.id,
+                            title: book.title,
+                            authors: book.authors.isNotEmpty ? book.authors.first : 'Unknown Author', 
+                            thumbnail: book.thumbnailUrl, 
+                            previewLink: book.previewLink,
+                            status: 'Ingin Dibaca', 
+                          );
+
+                          context.read<ShelfBloc>().add(ShelfAddRequested(shelfBook));
+
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Pilih ${book.title} untuk ditambahkan ke jurnal? Buka menu Jurnal Saya!')),
+                            SnackBar(
+                              content: Text('Berhasil menyimpan "${book.title}" ke Rak Virtual!'),
+                              backgroundColor: Colors.green,
+                              duration: const Duration(seconds: 2),
+                            ),
                           );
                         },
                       );
                     },
                   );
                 } else if (state is BookError) {
-                  return Center(child: Text(state.message));
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Text(
+                        'Gagal memuat: ${state.message}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  );
                 }
                 return const Center(child: Text('Ketikkan judul buku, lalu tekan tombol Cari.'));
               },
