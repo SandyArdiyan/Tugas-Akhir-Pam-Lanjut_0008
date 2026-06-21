@@ -3,9 +3,11 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
-    required: true,
+    required: [true, 'Email wajib diisi'],
     unique: true, // Tidak boleh ada email ganda
     trim: true,
+    lowercase: true, // Otomatis mengubah huruf besar jadi kecil (misal: Budi@gmail.com -> budi@gmail.com)
+    match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Format email tidak valid!'] // <-- INI KUNCI VALIDASINYA
   },
   password: {
     type: String,

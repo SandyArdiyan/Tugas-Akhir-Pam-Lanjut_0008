@@ -4,7 +4,7 @@ const shelfSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: false 
+    required: true 
   },
   bookId: { type: String, required: true },
   title: { type: String, required: true },

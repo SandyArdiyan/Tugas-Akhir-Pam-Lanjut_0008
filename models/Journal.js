@@ -4,7 +4,7 @@ const journalSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: false // Agar tidak error saat simpan tanpa ID user
+    required: true // Agar tidak error saat simpan tanpa ID user
   },
   bookId: {
     type: String,
