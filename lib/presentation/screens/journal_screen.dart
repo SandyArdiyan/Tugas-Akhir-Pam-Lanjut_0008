@@ -1,5 +1,8 @@
+import 'dart:io'; // <-- TAMBAHAN: Untuk mengelola File
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart'; // <-- TAMBAHAN: Untuk mencari folder penyimpanan lokal
+
 import '../blocs/journal/journal_bloc.dart';
 import '../blocs/journal/journal_event.dart';
 import '../blocs/journal/journal_state.dart';
@@ -18,6 +21,49 @@ class _JournalScreenState extends State<JournalScreen> {
   void initState() {
     super.initState();
     context.read<JournalBloc>().add(JournalLoadRequested());
+  }
+
+  // =================================================================
+  // FITUR BARU: Fungsi untuk Export (Memenuhi Syarat File Storage)
+  // =================================================================
+  Future<void> _exportJournalToTxt(BuildContext context, String bookTitle, String review, int rating) async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final cleanTitle = bookTitle.replaceAll(' ', '_').toLowerCase();
+      final file = File('${directory.path}/ulasan_$cleanTitle.txt');
+
+      final content = '''
+================================
+PUSTAKASISWA - JURNAL LITERASI
+================================
+Judul Buku : $bookTitle
+Rating     : $rating/5 Bintang
+Tanggal    : ${DateTime.now().toString().substring(0, 10)}
+
+Ulasan:
+$review
+================================
+''';
+
+      await file.writeAsString(content);
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Berhasil diekspor ke: ${file.path}'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal mengekspor file: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _showFormDialog(BuildContext context, {JournalModel? existingJournal}) {
@@ -60,13 +106,11 @@ class _JournalScreenState extends State<JournalScreen> {
                 );
 
                 if (existingJournal == null) {
-                  // Memicu event Add Jurnal
                   context.read<JournalBloc>().add(JournalAddRequested(newJournal));
                 } else {
-                  // Memicu event Update Jurnal
                   context.read<JournalBloc>().add(JournalUpdateRequested(existingJournal.id, newJournal));
                 }
-                Navigator.pop(dialogContext); // Tutup dialog setelah tekan simpan
+                Navigator.pop(dialogContext); 
               },
               child: const Text('Simpan'),
             ),
@@ -107,6 +151,19 @@ class _JournalScreenState extends State<JournalScreen> {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        // ==========================================
+                        // TOMBOL BARU: Download / Export Jurnal
+                        // ==========================================
+                        IconButton(
+                          icon: const Icon(Icons.download, color: Colors.blue),
+                          tooltip: 'Export ke TXT',
+                          onPressed: () => _exportJournalToTxt(
+                            context,
+                            journal.bookTitle,
+                            journal.review,
+                            journal.rating,
+                          ),
+                        ),
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.orange),
                           onPressed: () => _showFormDialog(context, existingJournal: journal),
