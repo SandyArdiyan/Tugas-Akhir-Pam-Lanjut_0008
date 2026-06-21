@@ -4,6 +4,7 @@ abstract class ShelfEvent {}
 
 class ShelfLoadRequested extends ShelfEvent {}
 
+
 class ShelfAddRequested extends ShelfEvent {
   final ShelfModel item;
   ShelfAddRequested(this.item);
@@ -12,4 +13,7 @@ class ShelfAddRequested extends ShelfEvent {
 class ShelfRemoveRequested extends ShelfEvent {
   final String id;
   ShelfRemoveRequested(this.id);
+  
 }
+
+class ShelfClearDataRequested extends ShelfEvent {}

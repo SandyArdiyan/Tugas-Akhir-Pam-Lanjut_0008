@@ -36,5 +36,12 @@ class ShelfBloc extends Bloc<ShelfEvent, ShelfState> {
         emit(ShelfError("Gagal menghapus dari rak"));
       }
     });
+
+    // ==========================================
+    // TAMBAHAN: Instruksi Sapu Bersih Data Rak
+    // ==========================================
+    on<ShelfClearDataRequested>((event, emit) {
+      emit(ShelfInitial()); 
+    });
   }
 }

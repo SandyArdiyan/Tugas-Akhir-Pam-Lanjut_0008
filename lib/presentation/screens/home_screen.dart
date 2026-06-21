@@ -8,10 +8,12 @@ import '../blocs/book/book_event.dart';
 import '../blocs/book/book_state.dart';
 import '../widgets/book_card.dart';
 
-// JALUR IMPORT YANG SUDAH DIPERBAIKI SESUAI FOLDERMU:
+// JALUR IMPORT UNTUK RAK DAN JURNAL (Dipakai untuk pembersihan memori saat logout)
 import '../blocs/shelf_bloc.dart';
 import '../blocs/shelf_event.dart';
 import '../../data/models/shelf_model.dart';
+import '../blocs/journal/journal_bloc.dart'; 
+import '../blocs/journal/journal_event.dart'; 
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -66,13 +68,21 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.library_books),
-            tooltip: 'Jurnal Saya',
+            tooltip: 'Rangkuman Buku Saya', 
             onPressed: () => context.push('/journal'), 
           ),
           IconButton(
             icon: const Icon(Icons.logout),
+            tooltip: 'Keluar Akun',
             onPressed: () {
+              // 1. "Sapu Bersih" data memori buku dari akun lama (INI YANG TADI MATI/DI-COMMENT)
+              context.read<ShelfBloc>().add(ShelfClearDataRequested());
+              context.read<JournalBloc>().add(JournalClearDataRequested());
+              
+              // 2. Hapus token keamanan
               context.read<AuthBloc>().add(AuthLogoutRequested());
+              
+              // 3. Pindah ke halaman login
               context.go('/login');
             },
           ),
@@ -132,7 +142,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       return BookCard(
                         book: book,
                         onTap: () {
-                          // KODE YANG SUDAH BERSIH DARI ERROR TYPE CHECK
                           final shelfBook = ShelfModel(
                             id: '', 
                             bookId: book.id,

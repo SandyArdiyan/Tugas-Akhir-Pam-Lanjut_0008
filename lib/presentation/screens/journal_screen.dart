@@ -28,7 +28,7 @@ class _JournalScreenState extends State<JournalScreen> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: Text(existingJournal == null ? 'Buat Jurnal Baru' : 'Edit Jurnal'),
+          title: Text(existingJournal == null ? 'Buat Rangkuman Buku' : 'Edit Buku'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -79,7 +79,7 @@ class _JournalScreenState extends State<JournalScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Jurnal Saya')),
+      appBar: AppBar(title: const Text('Rangkuman Buku Saya')),
       body: BlocConsumer<JournalBloc, JournalState>(
         listener: (context, state) {
           if (state is JournalActionSuccess) {

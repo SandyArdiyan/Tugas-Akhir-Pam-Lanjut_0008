@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 // Import Core & Storage
 import 'core/routing/app_router.dart';
 import 'core/utils/constants.dart';
@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
         RepositoryProvider(create: (_) => AuthRepository(dioClient, secureStorage)),
         RepositoryProvider(create: (_) => BookRepository()),
         RepositoryProvider(create: (_) => JournalRepository(dioClient)),
-        RepositoryProvider(create: (_) => ShelfRepository()), // <-- TAMBAHAN RAK
+        RepositoryProvider(create: (_) => ShelfRepository(dioClient)), // <-- TAMBAHAN RAK
       ],
       // 3. Daftarkan Semua BLoC untuk Mengatur Logika Bisnis Aplikasi
       child: MultiBlocProvider(
@@ -86,6 +86,7 @@ class PustakaSiswaApp extends StatelessWidget {
       title: 'PustakaSiswa',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        textTheme: GoogleFonts.poppinsTextTheme(),
         primaryColor: AppColors.primary,
         scaffoldBackgroundColor: AppColors.background,
         appBarTheme: const AppBarTheme(

@@ -40,5 +40,12 @@ class JournalBloc extends Bloc<JournalEvent, JournalState> {
         emit(JournalError("Gagal menghapus jurnal"));
       }
     });
+
+    // ==========================================
+    // TAMBAHAN: Instruksi Sapu Bersih Data Jurnal
+    // ==========================================
+    on<JournalClearDataRequested>((event, emit) {
+      emit(JournalInitial());
+    });
   }
 }

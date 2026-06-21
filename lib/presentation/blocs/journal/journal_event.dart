@@ -34,3 +34,11 @@ class JournalDeleteRequested extends JournalEvent {
   @override
   List<Object> get props => [id];
 }
+
+// ==========================================
+// TAMBAHAN: Event Sapu Bersih Data Jurnal
+// ==========================================
+class JournalClearDataRequested extends JournalEvent {
+  @override
+  List<Object> get props => [];
+}

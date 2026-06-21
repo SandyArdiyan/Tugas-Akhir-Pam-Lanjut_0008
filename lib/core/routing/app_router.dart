@@ -2,17 +2,20 @@ import 'package:go_router/go_router.dart';
 
 // Import semua halaman (screens) yang ada di aplikasimu
 import '../../presentation/screens/home_screen.dart';
-import '../../presentation/screens/shelf_screen.dart'; // <-- INI YANG TADI HILANG
-
-// Jika ada garis merah di dua baris bawah ini, 
-// sesuaikan nama file-nya dengan yang ada di laptopmu ya!
+import '../../presentation/screens/shelf_screen.dart'; 
 import '../../presentation/screens/journal_screen.dart'; 
 import '../../presentation/screens/login_screen.dart';
+import '../../presentation/screens/splash_screen.dart'; // <-- 1. TAMBAHKAN IMPORT INI
 
 class AppRouter {
   final GoRouter router = GoRouter(
-    initialLocation: '/home', // Ubah ke '/login' jika aplikasi harus mulai dari login
+    initialLocation: '/splash', // <-- 2. UBAH UTAMANYA KE /splash AGAR MUNCUL PERTAMA KALI
     routes: [
+      // --- 3. JALUR UTAMA MENUJU SPLASH SCREEN ---
+      GoRoute(
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
@@ -21,7 +24,6 @@ class AppRouter {
         path: '/home',
         builder: (context, state) => const HomeScreen(),
       ),
-      // --- INI ADALAH JALUR MENUJU RAK VIRTUAL YANG BARU ---
       GoRoute(
         path: '/shelf',
         builder: (context, state) => const ShelfScreen(),
