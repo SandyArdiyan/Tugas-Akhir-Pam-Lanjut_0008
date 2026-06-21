@@ -61,14 +61,6 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Eksplorasi Buku'),
         actions: [
-          // ==========================================
-          // FITUR BARU: Tombol Peta/Geolokasi Sensor
-          // ==========================================
-          IconButton(
-            icon: const Icon(Icons.map_outlined),
-            tooltip: 'Perpustakaan Terdekat',
-            onPressed: () => context.push('/maps'), // Arahkan ke rute maps (nanti kita buat halamannya)
-          ),
           IconButton(
             icon: const Icon(Icons.collections_bookmark),
             tooltip: 'Rak Virtual Saya',
@@ -83,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.logout),
             tooltip: 'Keluar Akun',
             onPressed: () {
-              // 1. "Sapu Bersih" data memori buku dari akun lama
+              // 1. "Sapu Bersih" data memori buku dari akun lama (INI YANG TADI MATI/DI-COMMENT)
               context.read<ShelfBloc>().add(ShelfClearDataRequested());
               context.read<JournalBloc>().add(JournalClearDataRequested());
               

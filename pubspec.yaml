@@ -26,10 +26,9 @@ dependencies:
   # Security
   flutter_secure_storage: ^9.0.0 
   rxdart: ^0.28.0
-  url_launcher: ^6.3.2
   google_fonts: ^8.1.0
   path_provider: ^2.1.6
-  geolocator: ^14.0.2
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
